@@ -1,4 +1,3 @@
-# phishnet
 to catch phish
 
 liquidweb ASN
