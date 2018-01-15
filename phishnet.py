@@ -8,14 +8,22 @@ import socket
 from cymruwhois import Client
 
 
-def in_network(ip):
+def in_network(domain):
+    try:
+        ip = socket.gethostbyname(domain)
+    except socket.gaierror:
+        ip = 'NULL'
+
     lw_asn = ['32244', '53824', '201682']
     c = Client()
+    if ip == 'NULL':
+        return False, ip
+
     r = c.lookup(ip)
     if r.asn in lw_asn:
-        return True
+        return True, ip
     else:
-        return False
+        return False, ip
 
 
 def print_callback(message, context):
@@ -32,13 +40,10 @@ def print_callback(message, context):
             domain = 'NULL'
         else:
             domain = all_domains[0]
-            try:
-                ip = socket.gethostbyname(domain)
-                if in_network(ip):
-                    sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M:%s'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
-                    sys.stdout.flush()
-            except socket.gaierror:
-                ip = 'NULL'
+            success, ip = in_network(domain)
+            if success:
+                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M:%s'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
+                sys.stdout.flush()
             
 
 
