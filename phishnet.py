@@ -13,12 +13,10 @@ def in_network(domain):
         ip = socket.gethostbyname(domain)
     except socket.gaierror:
         ip = 'NULL'
+        return False, ip
 
     lw_asn = ['32244', '53824', '201682']
     c = Client()
-    if ip == 'NULL':
-        return False, ip
-
     r = c.lookup(ip)
     if r.asn in lw_asn:
         return True, ip
@@ -45,7 +43,6 @@ def print_callback(message, context):
                 sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M:%s'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
                 sys.stdout.flush()
             
-
 
 #logging.basicConfig(format='[%(levelname)s:%(name)s] %(asctime)s - %(message)s', level=logging.INFO)
 
