@@ -8,10 +8,12 @@ import socket
 from cymruwhois import Client
 
 
-logger = logging.getLogger()
+logFile = 'phishnet.info'
+
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 log_formatter = logging.Formatter('[%(levelname)s:%(name)s] %(asctime)s - %(message)s')
-log_handler = logging.FileHandler('phishnet.info')
+log_handler = logging.FileHandler(logFile)
 log_handler.setFormatter(log_formatter)
 logger.addHandler(log_handler)
 logger.propagate = False
