@@ -5,6 +5,8 @@ import sys
 import datetime
 import certstream
 import socket
+import entropy
+from Levenshtein import distance
 from tld import get_tld
 from cymruwhois import Client
 
@@ -34,6 +36,14 @@ def score_domain(domain):
     except:
         pass
     
+    words_in_domain = re.split("\W+", domain)
+
+    for word in keywords.keys():
+        if word in domain:
+            score += keywords[word]
+
+    score += int(round(entropy.shannon_entropy(domain)*50))
+
 
 def in_network(domain):
     lw_asn = ['32244', '53824', '201682']
