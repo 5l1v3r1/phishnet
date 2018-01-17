@@ -1,2 +1,5 @@
 certstream==1.8
 cymruwhois==1.6
+tld==0.7.9
+entropy==0.10
+python_Levenshtein==0.12.0
