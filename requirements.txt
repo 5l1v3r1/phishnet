@@ -1,2 +1,3 @@
 certstream==1.8
 cymruwhois==1.6
+tld==0.7.9
