@@ -5,6 +5,7 @@ import sys
 import datetime
 import certstream
 import socket
+import re
 import entropy
 from Levenshtein import distance
 from tld import get_tld
@@ -44,6 +45,19 @@ def score_domain(domain):
 
     score += int(round(entropy.shannon_entropy(domain)*50))
 
+    for key in [k for (k,s) in keywords.items() if s >= 70]:
+        for word in [w for w in words_in_domain if w not in ['email', 'mail', 'cloud']]:
+            if distance(str(word), str(key)) == 1:
+                score += 70
+
+    if 'xn--' not in domain and domain.count('-') >= 4:
+        score += domain.count('-') * 3
+
+    if domain.count('.') >= 3:
+        score += domain.count('.') * 3
+
+    return score
+
 
 def in_network(domain):
     lw_asn = ['32244', '53824', '201682']
@@ -62,6 +76,8 @@ def in_network(domain):
         r = c.lookup(ip) # causing error sometimes
         if r.asn in lw_asn:
             success = True
+        else:
+            domain = ''
 
     return success, ip, domain
 
@@ -80,10 +96,12 @@ def print_callback(message, context):
         else:
             domain = all_domains[0]
             success, ip, domain = in_network(domain)
+            score = score_domain(domain.lower())
             if success:
-                logger.info(u'{} {} (SAN: {})'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:])))
+                logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:])), score)
 #                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
 #                sys.stdout.flush()
             
+#        logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:])), score)
 
 certstream.listen_for_events(print_callback)
