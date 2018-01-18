@@ -2,7 +2,7 @@
 import socket
 from cymruwhois import Client
 
-ip = socket.gethostbyname('empamor.com')
+ip = socket.gethostbyname('lidabus.by')
 
 lw_asn = [32244, 53824, 201682]
 print(lw_asn)
