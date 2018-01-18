@@ -98,35 +98,34 @@ def print_callback(message, context):
     if message['message_type'] == 'certificate_update':
         all_domains = message['data']['leaf_cert']['all_domains']
 
-        if len(all_domains) == 0:
-            domain = 'NULL'
-        else:
-            domain = all_domains[0]
-            # for wildcard certs, remove *.
-            if domain.startswith('*.'):
-                domain = domain[2:]
-            success, ip, domain = in_network(domain)
-
-#        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
-        for domain in all_domains:
-            
-            if success:
-                score = score_domain(domain.lower())
-                logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
-
-#            if score >= 65:
-#            logger.warning(u'{} {}'.format(domain, score))
-        
 #        if len(all_domains) == 0:
 #            domain = 'NULL'
 #        else:
 #            domain = all_domains[0]
+#            # for wildcard certs, remove *.
+#            if domain.startswith('*.'):
+#                domain = domain[2:]
 #            success, ip, domain = in_network(domain)
-#            if domain != '':
-#                score = score_domain(domain.lower())
+
+        for domain in all_domains:
+            score = score_domain(domain.lower())
+            if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
+                score += 10
+
+            if score >= 65:
+                logger.info(u'{} (score={})'.format(domain, score))
+
+#        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
+#        for domain in all_domains:
 #            if success:
-#                logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
-                
+#                score = score_domain(domain.lower())
+#                if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
+#                    score += 10
+#
+#                if score >= 65:
+#                    logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
+
+
 #                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
 #                sys.stdout.flush()
             
