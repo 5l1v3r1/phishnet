@@ -31,6 +31,10 @@ def score_domain(domain):
         if domain.endswith(tld):
             score += 20
 
+    # for wildcard certs, remove *.
+    if domain.startswith('*.'):
+        domain = domain[2:]
+
     try:
         res = get_tld(domain, as_object=True, fail_silentyl=True, fix_protocol=True)
         domain = '.'.join([res.subdomain, res.domain])
@@ -38,6 +42,13 @@ def score_domain(domain):
         pass
     
     words_in_domain = re.split("\W+", domain)
+
+
+    # for wildcard certs, remove *.
+    if domain.startswith('*.'):
+        domain = domain[2:]
+        if words_in_domain[0] in ['com', 'net', 'org']:
+            score += 10
 
     for word in keywords.keys():
         if word in domain:
@@ -63,18 +74,14 @@ def in_network(domain):
     lw_asn = ['32244', '53824', '201682']
     success = False
 
-    # for wildcard certs, remove *.
-    if domain.startswith('*.'):
-        domain = domain[2:]
-
     try:
         ip = socket.gethostbyname(domain)
     except socket.gaierror:
         ip = 'NULL'
     else:
         c = Client()
-        r = c.lookup(ip) # causing error sometimes
-        if r.asn in lw_asn:
+        r = c.lookup(ip) # causing certstream error sometimes
+        if r.asn not in lw_asn:
             success = True
         else:
             domain = ''
@@ -91,17 +98,36 @@ def print_callback(message, context):
     if message['message_type'] == 'certificate_update':
         all_domains = message['data']['leaf_cert']['all_domains']
 
-        if len(all_domains) == 0:
-            domain = 'NULL'
-        else:
-            domain = all_domains[0]
-            success, ip, domain = in_network(domain)
+#        if len(all_domains) == 0:
+#            domain = 'NULL'
+#        else:
+#            domain = all_domains[0]
+#            # for wildcard certs, remove *.
+#            if domain.startswith('*.'):
+#                domain = domain[2:]
+#            success, ip, domain = in_network(domain)
+
+        for domain in all_domains:
             score = score_domain(domain.lower())
-            if success:
-                logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:])), score)
+            if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
+                score += 10
+
+            if score >= 65:
+                logger.info(u'{} (score={})'.format(domain, score))
+
+#        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
+#        for domain in all_domains:
+#            if success:
+#                score = score_domain(domain.lower())
+#                if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
+#                    score += 10
+#
+#                if score >= 65:
+#                    logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
+
+
 #                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
 #                sys.stdout.flush()
             
-#        logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:])), score)
 
 certstream.listen_for_events(print_callback)
