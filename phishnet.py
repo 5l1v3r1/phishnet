@@ -99,23 +99,6 @@ def print_callback(message, context):
     if message['message_type'] == 'certificate_update':
         all_domains = message['data']['leaf_cert']['all_domains']
 
-#        if len(all_domains) == 0:
-#            domain = 'NULL'
-#        else:
-#            domain = all_domains[0]
-#            # for wildcard certs, remove *.
-#            if domain.startswith('*.'):
-#                domain = domain[2:]
-#            success, ip, domain = in_network(domain)
-
-#        for domain in all_domains:
-#            score = score_domain(domain.lower())
-#            if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
-#                score += 10
-#
-#            if score >= 65:
-#                logger.info(u'{} (score={})'.format(domain, score))
-
 #        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
 
         first_domain = all_domains[0]
@@ -131,12 +114,10 @@ def print_callback(message, context):
                 
                 domain_list.append(domain)
                 domain_list.append(str(score))
-#                print(domain_list[1:3])
-#                print(domain_list[3:])
 
-            #san_list = list(zip(*(iter(domain_list[3:])) * 2))
-                    
-            logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
+            san_list = [ ' '.join(x) for x in zip(domain_list[3::2], domain_list[4::2])]
+            if score >= 60:
+                logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
             #logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(domain_list[3:])))
                 #if score >= 65:
                 #    logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, first_domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
