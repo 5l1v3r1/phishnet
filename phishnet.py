@@ -116,7 +116,7 @@ def print_callback(message, context):
                 domain_list.append(str(score))
 
             san_list = [ ' '.join(x) for x in zip(domain_list[3::2], domain_list[4::2])]
-            if score >= 60:
+            if score >= 50:
                 logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
             #logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(domain_list[3:])))
                 #if score >= 65:
