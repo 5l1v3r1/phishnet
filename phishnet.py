@@ -91,8 +91,6 @@ def in_network(domain):
 
 
 def print_callback(message, context):
-#    logging.debug("Message -> {}".format(message))
-
     if message['message_type'] == 'heartbeat':
         return
 
