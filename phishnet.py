@@ -84,7 +84,7 @@ def in_network(domain):
     else:
         c = Client()
         r = c.lookup(ip) # causing certstream error sometimes
-        if r.asn not in lw_asn:
+        if r.asn in lw_asn:
             success = True
 
     return success, ip, domain
