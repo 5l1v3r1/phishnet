@@ -84,7 +84,7 @@ def in_network(domain):
     else:
         c = Client()
         r = c.lookup(ip) # causing certstream error sometimes
-        if r.asn not in lw_asn:
+        if r.asn in lw_asn:
             success = True
 
     return success, ip, domain
@@ -117,13 +117,13 @@ def print_callback(message, context):
 
             san_list = [ ' '.join(x) for x in zip(domain_list[3::2], domain_list[4::2])]
             if score >= 50:
-                logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
+                logger.info(u'{} {} (SAN: {})\n'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
+
             #logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(domain_list[3:])))
                 #if score >= 65:
                 #    logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, first_domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
 
 #                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
 #                sys.stdout.flush()
-            
 
 certstream.listen_for_events(print_callback)
