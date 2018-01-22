@@ -18,7 +18,7 @@ logFile = 'info.log'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-log_formatter = logging.Formatter('[%(levelname)s:%(name)s] %(asctime)s - %(message)s')
+log_formatter = logging.Formatter('[%(levelname)s:%(name)s] %(asctime)s - %(message)s', '%Y-%m-%d %H:%M:%S')
 log_handler = logging.FileHandler(logFile)
 log_handler.setFormatter(log_formatter)
 logger.addHandler(log_handler)
@@ -84,7 +84,7 @@ def in_network(domain):
     else:
         c = Client()
         r = c.lookup(ip) # causing certstream error sometimes
-        if r.asn in lw_asn:
+        if r.asn not in lw_asn:
             success = True
 
     return success, ip, domain
