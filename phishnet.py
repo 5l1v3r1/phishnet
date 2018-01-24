@@ -7,12 +7,16 @@ import certstream
 import socket
 import re
 import entropy
+import time
+import tqdm
 from Levenshtein import distance
 from tld import get_tld
 from cymruwhois import Client
 
 from suspicious import keywords, tlds
 
+
+pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
 
 logFile = 'info.log'
 
@@ -89,7 +93,7 @@ def in_network(domain):
         ip = 'NULL'
     else:
         c = Client()
-        r = c.lookup(ip) # causing certstream error sometimes
+        r = c.lookup(ip)
         if r.asn in lw_asn:
             success = True
 
@@ -104,6 +108,8 @@ def print_callback(message, context):
         all_domains = message['data']['leaf_cert']['all_domains']
 
 #        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
+
+        pbar.update(1)
 
         # finds ip on first domain, avoids lookup on all SAN
         if len(all_domains) == 0:
@@ -129,9 +135,13 @@ def print_callback(message, context):
             # this makes output to log pretty, for SAN. {domain score} instead
             # of {domain, score}
             san_list = [ ' '.join(x) for x in zip(domain_list[3::2], domain_list[4::2])]
-            # only log if score is above 65
-            if score >= 65:
+            # only log if score is above 60
+            if score >= 60:
                 logger.info(u'{} {} (SAN: {})\n'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
+
+        # need to figure out a way to avoid the timeout. output from certstream
+        # is too fast for the in_network to handle, I think?
+        # time.sleep(1)
 
 #                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
 #                sys.stdout.flush()
