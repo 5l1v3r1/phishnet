@@ -16,12 +16,14 @@ from suspicious import keywords, tlds
 
 logFile = 'info.log'
 
+# creating logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 log_formatter = logging.Formatter('[%(levelname)s:%(name)s] %(asctime)s - %(message)s', '%Y-%m-%d %H:%M:%S')
 log_handler = logging.FileHandler(logFile)
 log_handler.setFormatter(log_formatter)
 logger.addHandler(log_handler)
+# setting false so no output to console
 logger.propagate = False
 
 
@@ -70,15 +72,19 @@ def score_domain(domain):
     return score
 
 
+# check if domain is inside lw's network
 def in_network(domain):
     lw_asn = ['32244', '53824', '201682']
     success = False
 
+    # removes wildcard cert
     if domain.startswith('*.'):
         domain = domain[2:]
 
     try:
+        # gets the ip
         ip = socket.gethostbyname(domain)
+    # if domain doesn't return an ip
     except socket.gaierror:
         ip = 'NULL'
     else:
@@ -99,12 +105,16 @@ def print_callback(message, context):
 
 #        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
 
+        # finds ip on first domain, doesn't include all SAN
         first_domain = all_domains[0]
         success, ip, first_domain = in_network(first_domain)
 
+        # if domain is inside lw
         if success:
+            # puts ip, domain, SAN all inside a list
             domain_list = list()
             domain_list.append(ip)
+            # finds score for all domain including SAN
             for domain in all_domains:
                 score = score_domain(domain.lower())
                 if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
@@ -113,13 +123,12 @@ def print_callback(message, context):
                 domain_list.append(domain)
                 domain_list.append(str(score))
 
+            # this makes output to log pretty, for SAN. {domain score} instead
+            # of {domain, score}
             san_list = [ ' '.join(x) for x in zip(domain_list[3::2], domain_list[4::2])]
-            if score >= 50:
+            # only log if score is above 65
+            if score >= 65:
                 logger.info(u'{} {} (SAN: {})\n'.format(ip, ' '.join(domain_list[1:3]), ', '.join(san_list)))
-
-            #logger.info(u'{} {} (SAN: {})'.format(ip, ' '.join(domain_list[1:3]), ', '.join(domain_list[3:])))
-                #if score >= 65:
-                #    logger.info(u'{} {} (SAN: {} (score={}))'.format(ip, first_domain, ', '.join(message['data']['leaf_cert']['all_domains'][1:]), score))
 
 #                sys.stdout.write(u"{} - {} {} (SAN: {})\n".format(datetime.datetime.now().strftime('%m/%d/%y %H:%M'), ip, domain, ", ".join(message['data']['leaf_cert']['all_domains'][1:])))
 #                sys.stdout.flush()
