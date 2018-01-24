@@ -7,6 +7,7 @@ import certstream
 import socket
 import re
 import entropy
+import pygeoip
 import time
 import tqdm
 from Levenshtein import distance
@@ -78,23 +79,38 @@ def score_domain(domain):
 
 # check if domain is inside lw's network
 def in_network(domain):
-    lw_asn = ['32244', '53824', '201682']
+    lw_asn = ['AS32244', 'AS53824', 'AS201682']
     success = False
-
-    # removes wildcard cert
+#
+#    # removes wildcard cert
+#    if domain.startswith('*.'):
+#        domain = domain[2:]
+#
+#    try:
+#        # gets the ip
+#        ip = socket.gethostbyname(domain)
+#    # if domain doesn't return an ip
+#    except socket.gaierror:
+#        ip = 'NULL'
+#    else:
+#        c = Client()
+#        r = c.lookup(ip)
+#        if r.asn in lw_asn:
+#            success = True
+#
+#    return success, ip, domain
+    asn_data = pygeoip.GeoIP('GeoIPASNum.dat')
     if domain.startswith('*.'):
         domain = domain[2:]
 
     try:
-        # gets the ip
+        asn_lookup = asn_data.org_by_name(domain)
         ip = socket.gethostbyname(domain)
-    # if domain doesn't return an ip
     except socket.gaierror:
         ip = 'NULL'
     else:
-        c = Client()
-        r = c.lookup(ip)
-        if r.asn in lw_asn:
+        asn = asn_lookup.split()
+        if asn[0] not in lw_asn and not None:
             success = True
 
     return success, ip, domain
@@ -109,7 +125,7 @@ def print_callback(message, context):
 
 #        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
 
-        pbar.update(1)
+#        pbar.update(1)
 
         # finds ip on first domain, avoids lookup on all SAN
         if len(all_domains) == 0:
