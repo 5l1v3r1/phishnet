@@ -81,6 +81,7 @@ def score_domain(domain):
 def in_network(domain):
     lw_asn = ['AS32244', 'AS53824', 'AS201682']
     success = False
+    ip = 'None'
 #
 #    # removes wildcard cert
 #    if domain.startswith('*.'):
@@ -105,13 +106,16 @@ def in_network(domain):
 
     try:
         asn_lookup = asn_data.org_by_name(domain)
-        ip = socket.gethostbyname(domain)
     except socket.gaierror:
-        ip = 'NULL'
+        pass
     else:
-        asn = asn_lookup.split()
-        if asn[0] not in lw_asn and not None:
-            success = True
+        if asn_lookup is None:
+            pass
+        else:
+            asn = asn_lookup.split()
+            if asn[0] not in lw_asn:
+                ip = socket.gethostbyname(domain)
+                success = True
 
     return success, ip, domain
 
@@ -125,7 +129,7 @@ def print_callback(message, context):
 
 #        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
 
-#        pbar.update(1)
+        pbar.update(1)
 
         # finds ip on first domain, avoids lookup on all SAN
         if len(all_domains) == 0:
