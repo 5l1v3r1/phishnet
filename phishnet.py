@@ -109,11 +109,9 @@ def in_network(domain):
     except socket.gaierror:
         pass
     else:
-        if asn_lookup is None:
-            pass
-        else:
+        if asn_lookup is not None:
             asn = asn_lookup.split()
-            if asn[0] not in lw_asn:
+            if asn[0] in lw_asn:
                 ip = socket.gethostbyname(domain)
                 success = True
 
@@ -127,7 +125,7 @@ def print_callback(message, context):
     if message['message_type'] == 'certificate_update':
         all_domains = message['data']['leaf_cert']['all_domains']
 
-#        all_domains = ['*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
+#        all_domains = ['asdfsdflkewlwejdie.com', '*.positiveaddictionsupport.tk', 'googlebizlist.com', 'www.googletagtv.com', 'cpanel.gmailsecurelogin.com', 'www.account-managed.gq', 'portal-ssl1106-5.bmix-dal-yp-442e830e-1b19-4c1b-982e-a02392f87053.oliver-gibson-uk-ibm-com.composedb.com', 'security-support.cf', 'kayseriturkoloji.com', 'kariyererzincan.com', 'kayseriturkoloji.com', 'limited.paypal.com.issues.janetdutson.com', 'viajestandem.com', 'hjinternationals.com', 'www.greenhillsadoptionsupportservices.com']
 
         pbar.update(1)
 
